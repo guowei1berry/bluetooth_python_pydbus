@@ -137,7 +137,7 @@ def list_connected_devices():
                 }  
     # # print("values",first,second,third,fourth)
     print("thisdict",json.dumps(thisdict, indent=4, sort_keys=True, default=str))
-
+    return thisdict
     # r = requests.post('http://localhost:8000/post', json={"thisdict": json.dumps(thisdict, indent=4, sort_keys=True, default=str)})
     # r = requests.post('http://jarvis-mqtt.viatick.com/jarvis/ble/du.guowei17/reading', json={"thisdict": json.dumps(thisdict, indent=4, sort_keys=True, default=str)})
     # print("status",r.status_code)
@@ -168,11 +168,12 @@ def publish(client):
     msg_count = 0
     while True:
         time.sleep(1)
+        data_Call = list_connected_devices() 
         msg = f"messages: {msg_count}"
-        result = client.publish(topic, msg)
+        print("data_Call",data_Call)
+        result = client.publish(topic, str(data_Call))
         # result: [0, 1]
         status = result[0]
-        list_connected_devices()  
         if status == 0:
             print(f"Send `{msg}` to topic `{topic}`")
         else:
