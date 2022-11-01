@@ -6,8 +6,7 @@ from datetime import datetime,timezone
 import json
 import random
 from paho.mqtt import client as mqtt_client
-now_utc = datetime.now(timezone.utc)
-print(now_utc)
+import re
 
 bus = pydbus.SystemBus()
 
@@ -32,6 +31,10 @@ def retrieveData(val):
 
 def list_connected_devices():
     mngd_objs = mngr.GetManagedObjects()
+
+    now_ = datetime.now(timezone.utc)
+    now_utc =  now_.strftime("%Y-%m-%d %H:%M:%S")
+    # print(now_utc)
 
     # for item in mngd_objs.items():
     #     print("item",item)
@@ -103,31 +106,31 @@ def list_connected_devices():
     thisdict = {
                 # "step": step,
                 "msg" : "advData",
-                "gmac" : "1c:69:7a:62:cd:e4",#"YOUR_GATEWAY_MAC_HERE",
-                "readings" : [
+                "gmac" : "1c697a62cde4",#"1c:69:7a:62:cd:e4",#"YOUR_GATEWAY_MAC_HERE",
+                "obj" : [
                              {
-                                "dmac" : "AC_23_3F_71_05_3C",
+                                "dmac" : "AC233F71053C",
                                 "type" : 4,
                                 "rssi" : first_rssi,
                                 "refpower" : first_refPower,
                                 "time" : now_utc
                             },
                             {
-                                "dmac" : "AC_23_3F_71_05_3D",
+                                "dmac" : "AC233F71053D",
                                 "type" : 4,
                                 "rssi" : second_rssi,
                                 "refpower" : second_refPower,
                                 "time" : now_utc
                             },
                             {
-                                "dmac" : "AC_23_3F_71_05_01",
+                                "dmac" : "AC233F710501",
                                 "type" : 4,
                                 "rssi" : third_rssi,
                                 "refpower" : third_refPower,
                                 "time" : now_utc
                             },
                             {
-                                "dmac" : "AC_23_3F_71_05_00",
+                                "dmac" : "AC233F710500",
                                 "type" : 4,
                                 "rssi" : forth_rssi,
                                 "refpower" : forth_refPower,
@@ -136,8 +139,10 @@ def list_connected_devices():
                             ]
                 }  
     # # print("values",first,second,third,fourth)
-    print("thisdict",json.dumps(thisdict, indent=4, sort_keys=True, default=str))
-    return thisdict
+    # print("thisdict",json.dumps(thisdict, indent=4, sort_keys=True, default=str))
+    json_data = json.dumps(thisdict, indent=4, sort_keys=True, default=str)
+    print(json_data)
+    return json_data
     # r = requests.post('http://localhost:8000/post', json={"thisdict": json.dumps(thisdict, indent=4, sort_keys=True, default=str)})
     # r = requests.post('http://jarvis-mqtt.viatick.com/jarvis/ble/du.guowei17/reading', json={"thisdict": json.dumps(thisdict, indent=4, sort_keys=True, default=str)})
     # print("status",r.status_code)
@@ -147,7 +152,7 @@ def list_connected_devices():
 #################################### MQTT CONNECT ############################################
 broker = 'jarvis-mqtt.viatick.com'
 port = 1883
-topic = "jarvis/ble/du.guowei17/reading"
+topic = "jarvis/ble/duguowei17/reading"
 client_id = f'python-mqtt-{random.randint(0, 1000)}'
 
 def connect_mqtt():
@@ -170,8 +175,9 @@ def publish(client):
         time.sleep(1)
         data_Call = list_connected_devices() 
         msg = f"messages: {msg_count}"
-        print("data_Call",data_Call)
+        # print("data_Call",data_Call)
         result = client.publish(topic, str(data_Call))
+        print("result",result)
         # result: [0, 1]
         status = result[0]
         if status == 0:
